@@ -1,47 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '../components';
-import { stock_check_forForms , stock_check_forStrengths, checkFormsForNonNullIds } from './StockAvalibility';
+import { checkFormsForNonNullIds, checkStrengthForNonNullIds, checkPackagingForNonNullIds } from './StockAvalibility';
 
 
 
 function Card({ salt_name, forms, salt_json, }) {
 
-
-    const [selectedForm, setSelectedForm] = useState(forms[0]);
+    const [formdata, setFormdata] = useState([]);
+    const [selectedForm, setSelectedForm] = useState(null);
     const [selectedStrength, setSelectedStrength] = useState(null);
     const [selectedPackaging, setSelectedPackaging] = useState(null);
 
-    const [show_All_Forms_Buttons, set_show_All_Forms_Buttons] = useState(false);
-    const [show_All_Strengths_Buttons, set_show_All_Strengths_Buttons] = useState(false);
-    const [show_All_Packaging_Buttons, set_show_All_Packaging_Buttons] = useState(false);
+    const [showAllFormsButtons, setShowAllFormsButtons] = useState(false);
+    const [showAllStrengthsButtons, setShowAllStrengthsButtons] = useState(false);
+    const [showAllPackagingButtons, setShowAllPackagingButtons] = useState(false);
 
     const [filteredStrengths, setFilteredStrengths] = useState([]);
     const [filteredPackaging, setFilteredPackaging] = useState([]);
-    const [price, setPrice] = useState(); // state for price
-    const [StockAvalibility, setStockAvalibility] = useState(stock_check_forForms(salt_json));//  NOT CORRECT HAVE TO CAHNGE
+    const [price, setPrice] = useState(null);
 
-    // console.log(checkFormsForNonNullIds(data));
+    useEffect(() => {
+        const nonNullIds = checkFormsForNonNullIds(salt_json);
+        const formData = forms.map((form, index) => ({
+            Form: form.charAt(0) + form.slice(1), // Capitalize the first letter
+            stock: nonNullIds[index]
+        }));
+        setFormdata(formData);
+    }, [forms, salt_json]);
 
-
-    // useEffect(() => {
-    //     if(stock_check_forForms(salt_json)){
-    //         // console.log('Stock Available');
-    //         // setStockAvalibility(true);
-    //     }
-    //     else{
-    //         // console.log('Stock Not Available');
-    //         // setStockAvalibility(false);
-    //     }
-    // }, [salt_json])
-    
+    useEffect(() => {
+        if (formdata.length > 0) {
+            setSelectedForm(formdata[0].Form);
+        }
+    }, [formdata]);
 
     useEffect(() => {
         if (selectedForm && salt_json[selectedForm]) {
             const strengths = Object.keys(salt_json[selectedForm]);
-            // console.log(stock_check(salt_json))
-            setFilteredStrengths(strengths.map(str => ({ name: str })));//, stock_available: { availability }
+            const strengthData = salt_json[selectedForm]
+            const StrengthnonNullIds = checkStrengthForNonNullIds(strengthData);
+            const daa = strengths.map((str, index) => ({
+                Strength: str.charAt(0) + str.slice(1),
+                stock: StrengthnonNullIds[index]
+            }));
+            setFilteredStrengths(daa.map(daa => ({ name: daa.Strength, stock_available: daa.stock })));
             setSelectedStrength(strengths[0]);
-            
         } else {
             setFilteredStrengths([]);
             setSelectedStrength(null);
@@ -51,11 +54,15 @@ function Card({ salt_name, forms, salt_json, }) {
     useEffect(() => {
         if (selectedForm && selectedStrength && salt_json[selectedForm] && salt_json[selectedForm][selectedStrength]) {
             const packagingOptions = Object.keys(salt_json[selectedForm][selectedStrength]);
-            const strengthdata = salt_json[selectedForm][selectedStrength];
-            // console.log(strengthdata);
-            const Strengthstockcheck = stock_check_forStrengths(strengthdata)
-            console.log(Strengthstockcheck);
-            setFilteredPackaging(packagingOptions.map(pack => ({ name: pack, stock_available: { Strengthstockcheck } })));// , stock_available: { availability }
+            const packagingData = salt_json[selectedForm][selectedStrength];
+            const packagingnonNullIds = checkPackagingForNonNullIds(packagingData);
+            // console.log(packagingnonNullIds);
+            const caa = packagingOptions.map((pack, index) => ({
+                package: pack.charAt(0) + pack.slice(1),
+                stock: packagingnonNullIds[index]
+            }));
+            console.log(caa);
+            setFilteredPackaging(caa.map(caa => ({ name: caa.package, stock_available: caa.stock })));
             setSelectedPackaging(packagingOptions[0]);
         } else {
             setFilteredPackaging([]);
@@ -63,39 +70,25 @@ function Card({ salt_name, forms, salt_json, }) {
         }
     }, [selectedForm, selectedStrength, salt_json]);
 
-
-
     useEffect(() => {
-        // console.log('Checking price for:', selectedForm, selectedStrength, selectedPackaging);
-        if (
-            selectedForm &&
-            selectedStrength &&
-            selectedPackaging &&
-            salt_json[selectedForm] &&
-            salt_json[selectedForm][selectedStrength] &&
-            salt_json[selectedForm][selectedStrength][selectedPackaging]
-        ) {
+        if (selectedForm && selectedStrength && selectedPackaging && salt_json[selectedForm] &&
+            salt_json[selectedForm][selectedStrength] && salt_json[selectedForm][selectedStrength][selectedPackaging]) {
             const packagingData = salt_json[selectedForm][selectedStrength][selectedPackaging];
-                        
             const arrayFromObject = Object.entries(packagingData)
-            .reduce((acc, [key, value]) => {
-                if (value !== null) {
-                    acc.push({ value });
-                }
-                return acc;
-            }, []).filter(obj => obj.value !== null && obj.value !== undefined);
+                .reduce((acc, [key, value]) => {
+                    if (value !== null) {
+                        acc.push({ value });
+                    }
+                    return acc;
+                }, []).filter(obj => obj.value !== null && obj.value !== undefined);
 
             if (arrayFromObject.length === 0) {
                 setPrice(false);
             } else {
                 const sellingPrices = arrayFromObject.flatMap(item =>
-                    Object.values(item.value).flatMap(obj => {
-                        // console.log("Current Object:", obj);
-                        return obj.selling_price;
-                    })
+                    Object.values(item.value).flatMap(obj => obj.selling_price)
                 );
-                const lowestPrice = Math.min(...sellingPrices)
-                // console.log(lowestPrice);
+                const lowestPrice = Math.min(...sellingPrices);
                 setPrice(lowestPrice);
             }
         }
@@ -115,22 +108,22 @@ function Card({ salt_name, forms, salt_json, }) {
                         form :
                     </p>
                     <div className='  bg-transparent py-4 text-md w-[74%] min-h-[5rem] flex flex-wrap justify-start gap-4 px-2'>
-                        {forms.slice(0, show_All_Forms_Buttons ? forms.length : 2).map((form, index) => (
+                        {formdata.slice(0, showAllFormsButtons ? formdata.length : 2).map((f, index) => (
                             <Button
                                 key={index}
-                                onClick={() => setSelectedForm(form)}
-                                selected={selectedForm === form}
-                                stock_available={StockAvalibility}  //  NOT CORRECT HAVE TO CAHNGE
+                                onClick={() => setSelectedForm(f.Form)}
+                                selected={selectedForm === f.Form}
+                                stock_available={f.stock}
                             >
-                                {form}
+                                {f.Form}
                             </Button>
                         ))}
-                        {forms.length > 2 && (
+                        {formdata.length > 2 && (
                             <button
-                                className={`more-button font-bold text-cyan-900 ${show_All_Forms_Buttons ? 'hide' : ''}`}
-                                onClick={() => set_show_All_Forms_Buttons(!show_All_Forms_Buttons)}
+                                className={`more-button font-bold text-cyan-900 ${showAllFormsButtons ? 'hide' : ''}`}
+                                onClick={() => setShowAllFormsButtons(!showAllFormsButtons)}
                             >
-                                {show_All_Forms_Buttons ? 'Hide..' : 'More..'}
+                                {showAllFormsButtons ? 'Hide..' : 'More..'}
                             </button>
                         )}
                     </div>
@@ -140,7 +133,7 @@ function Card({ salt_name, forms, salt_json, }) {
                         strength :
                     </p>
                     <div className='  bg-transparent text-md py-4 w-[74%] min-h-[5rem] flex flex-wrap justify-start gap-4 px-2'>
-                        {filteredStrengths.slice(0, show_All_Strengths_Buttons ? filteredStrengths.length : 2).map((strength, index) => (
+                        {filteredStrengths.slice(0, showAllStrengthsButtons ? filteredStrengths.length : 2).map((strength, index) => (
                             <Button
                                 key={index}
                                 onClick={() => setSelectedStrength(strength.name)}
@@ -153,10 +146,10 @@ function Card({ salt_name, forms, salt_json, }) {
                         ))}
                         {filteredStrengths.length > 2 && (
                             <button
-                                className={`more-button font-bold text-cyan-900 ${show_All_Strengths_Buttons ? 'hide' : ''}`}
-                                onClick={() => set_show_All_Strengths_Buttons(!show_All_Strengths_Buttons)}
+                                className={`more-button font-bold text-cyan-900 ${showAllStrengthsButtons ? 'hide' : ''}`}
+                                onClick={() => setShowAllStrengthsButtons(!showAllStrengthsButtons)}
                             >
-                                {show_All_Strengths_Buttons ? 'Hide..' : 'More..'}
+                                {showAllStrengthsButtons ? 'Hide..' : 'More..'}
                             </button>
                         )}
                     </div>
@@ -166,12 +159,11 @@ function Card({ salt_name, forms, salt_json, }) {
                         packaging :
                     </p>
                     <div className='bg-transparent text-md py-4 w-[74%] min-h-[5rem] flex flex-wrap justify-start gap-4 px-2'>
-                        {filteredPackaging.slice(0, show_All_Packaging_Buttons ? filteredPackaging.length : 2).map((pack, index) => (
+                        {filteredPackaging.slice(0, showAllPackagingButtons ? filteredPackaging.length : 2).map((pack, index) => (
                             <Button
                                 key={index}
                                 onClick={() => setSelectedPackaging(pack.name)}
-                                // stock_available={isPrice_Available} //  NOT CORRECT HAVE TO CAHNGE
-                                // stock_available={pack.stock_available}
+                                stock_available={pack.stock_available}
                                 selected={selectedPackaging === pack.name}
                             >
                                 {pack.name}
@@ -179,10 +171,10 @@ function Card({ salt_name, forms, salt_json, }) {
                         ))}
                         {filteredPackaging.length > 2 && (
                             <button
-                                className={`more-button font-bold text-cyan-900 ${show_All_Packaging_Buttons ? 'hide' : ''}`}
-                                onClick={() => set_show_All_Packaging_Buttons(!show_All_Packaging_Buttons)}
+                                className={`more-button font-bold text-cyan-900 ${showAllPackagingButtons ? 'hide' : ''}`}
+                                onClick={() => setShowAllPackagingButtons(!showAllPackagingButtons)}
                             >
-                                {show_All_Packaging_Buttons ? 'Hide..' : 'More..'}
+                                {showAllPackagingButtons ? 'Hide..' : 'More..'}
                             </button>
                         )}
                     </div>
