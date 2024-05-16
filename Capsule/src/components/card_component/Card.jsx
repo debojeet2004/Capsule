@@ -93,13 +93,6 @@ function Card({ salt_name, forms, salt_json, }) {
             }
         }
     }, [selectedForm, selectedStrength, selectedPackaging, salt_json]);
-
-
-
-
-
-
-
     return (
         <div className='capitalize w-full min-h-[15rem] rounded-[1.2rem] p-4 flex justify-between items-center bg-gradient-to-r from-white via-slate-100 to-gray-200 shadow-[0_0_50px_0] shadow-stone-300'>
             <div className='bg-transparent w-[34%] min-h-[15rem] flex flex-col justify-between items-center'>
