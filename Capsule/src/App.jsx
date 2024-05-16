@@ -1,5 +1,6 @@
 import { useSelector } from 'react-redux';
-import { Card,Search_bar,Conatainer} from './components/components'
+import { Search_bar,Conatainer} from './components/components'
+import { Outlet } from 'react-router-dom'
 
 
 function App() {
@@ -14,14 +15,7 @@ function App() {
         {salts.length === 0 ? (
         <p className='w-full capitalize flex justify-center items-center py-[15rem] text-[1.5rem] opacity-90 text-gray-400 tracking-wide font-sans'>"Find medicines with amazing discounts"</p>
       ) : (
-        salts.map(salt => (
-          <Card
-            key={salt.id}
-            salt_name={salt.salt}
-            forms={(salt.salt_forms_json ? Object.keys(salt.salt_forms_json).flat() : [])}
-            salt_json={salt.salt_forms_json}
-          />
-        ))
+        <Outlet/>
       )}
 
       
