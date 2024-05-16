@@ -1,76 +1,74 @@
-export const stock_check_forForms = (saltFormsJson) => {
-    // Iterate over each form (tablet, capsule)
-    for (const formKey in saltFormsJson) {
-        const form = saltFormsJson[formKey];
-        // console.log("form",form);
+// export const stock_check_forForms = (saltFormsJson) => {
+//     // Iterate over each form (tablet, capsule)
+//     for (const formKey in saltFormsJson) {
+//         const form = saltFormsJson[formKey];
+//         // console.log("form",form);
         
-        // Iterate over each strength (e.g., 50mg, 100mg)
-        for (const strengthKey in form) {
-            const strength = form[strengthKey];
-            // console.log("strength",strength);
-            // Iterate over each packaging (e.g., 10 tablets, 20 capsules)
-            for (const packagingKey in strength) {
-                const packaging = strength[packagingKey];
-                // console.log("packaging",packaging);
-                // Check if packaging is not null
-                if (packaging !== null) {
-                    // Iterate over each ID
-                    for (const idKey in packaging) {
-                        const id = packaging[idKey];
+//         // Iterate over each strength (e.g., 50mg, 100mg)
+//         for (const strengthKey in form) {
+//             const strength = form[strengthKey];
+//             // console.log("strength",strength);
+//             // Iterate over each packaging (e.g., 10 tablets, 20 capsules)
+//             for (const packagingKey in strength) {
+//                 const packaging = strength[packagingKey];
+//                 // console.log("packaging",packaging);
+//                 // Check if packaging is not null
+//                 if (packaging !== null) {
+//                     // Iterate over each ID
+//                     for (const idKey in packaging) {
+//                         const id = packaging[idKey];
                         
-                        // If any ID is not null, return true
-                        if (id !== null) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    // If no non-null ID found, return false
-    return false;
-}
-export const  stock_check_forStrengths = (strengths) => {
-        // Iterate over each strength (e.g., 50mg, 100mg)
-        for (const strengthKey in strengths) {
-            const strength = strengths[strengthKey];
+//                         // If any ID is not null, return true
+//                         if (id !== null) {
+//                             return true;
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+//     // If no non-null ID found, return false
+//     return false;
+// }
+// export const  stock_check_forStrengths = (strengths) => {
+//         // Iterate over each strength (e.g., 50mg, 100mg)
+//         for (const strengthKey in strengths) {
+//             const strength = strengths[strengthKey];
             
-            // Iterate over each packaging (e.g., 10 tablets, 20 capsules)
-            for (const packagingKey in strength) {
-                const packaging = strength[packagingKey];
+//             // Iterate over each packaging (e.g., 10 tablets, 20 capsules)
+//             for (const packagingKey in strength) {
+//                 const packaging = strength[packagingKey];
                 
-                // Check if packaging is not null
-                if (packaging !== null) {
-                    // Iterate over each ID
-                    for (const idKey in packaging) {
-                        const id = packaging[idKey];
+//                 // Check if packaging is not null
+//                 if (packaging !== null) {
+//                     // Iterate over each ID
+//                     for (const idKey in packaging) {
+//                         const id = packaging[idKey];
                         
-                        // If any ID is not null, return true
-                        if (id !== null) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        // If no non-null ID found, return false
-        return false;
-    }
+//                         // If any ID is not null, return true
+//                         if (id !== null) {
+//                             return true;
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//         // If no non-null ID found, return false
+//         return false;
+//     }
 
 
 
 export const checkFormsForNonNullIds = (saltFormsJson) => {
     const results = [];
 
-    // Iterate over each form (e.g., tablet, capsule)
     for (const formKey in saltFormsJson) {
         const form = saltFormsJson[formKey];
-        const formResults = [];
+        let formHasNonNullId = false;
 
         // Iterate over each strength (e.g., 50mg, 100mg)
         for (const strengthKey in form) {
             const strength = form[strengthKey];
-            let strengthHasNonNullId = false;
 
             // Iterate over each packaging (e.g., 10 tablets, 20 capsules)
             for (const packagingKey in strength) {
@@ -82,26 +80,98 @@ export const checkFormsForNonNullIds = (saltFormsJson) => {
                     for (const idKey in packaging) {
                         const id = packaging[idKey];
 
-                        // If any ID is not null, mark this strength as having a non-null ID
+                        // If any ID is not null, mark this form as having a non-null ID
                         if (id !== null) {
-                            strengthHasNonNullId = true;
+                            formHasNonNullId = true;
                             break;
                         }
                     }
                 }
 
                 // If we found a non-null ID in this packaging, no need to check more packagings for this strength
-                if (strengthHasNonNullId) {
+                if (formHasNonNullId) {
                     break;
                 }
             }
 
-            // Store the result for this strength
-            formResults.push(strengthHasNonNullId);
+            // If we found a non-null ID in this strength, no need to check more strengths for this form
+            if (formHasNonNullId) {
+                break;
+            }
         }
 
-        // Store the results for this form
-        results.push(formResults);
+        // Store the result for this form
+        results.push(formHasNonNullId);
+    }
+
+    return results;
+}
+
+
+
+export const checkStrengthForNonNullIds = (saltFormsJson) => {
+    const results = [];
+
+    for (const strengthKey in saltFormsJson) {
+        const strength = saltFormsJson[strengthKey];
+        let strengthHasNonNullId = false;
+
+        // Iterate over each packaging (e.g., 10 tablets, 20 capsules)
+        for (const packagingKey in strength) {
+            const packaging = strength[packagingKey];
+
+            // Check if packaging is not null
+            if (packaging !== null) {
+                // Iterate over each ID
+                for (const idKey in packaging) {
+                    const id = packaging[idKey];
+
+                    // If any ID is not null, mark this strength as having a non-null ID
+                    if (id !== null) {
+                        strengthHasNonNullId = true;
+                        break;
+                    }
+                }
+            }
+
+            // If we found a non-null ID in this packaging, no need to check more packagings for this strength
+            if (strengthHasNonNullId) {
+                break;
+            }
+        }
+
+        // Store the result for this strength
+        results.push(strengthHasNonNullId);
+    }
+
+    return results;
+}
+
+
+export const checkPackagingForNonNullIds = (packagingJson) => {
+    const results = [];
+
+    // Iterate over each packaging
+    for (const packagingKey in packagingJson) {
+        const packaging = packagingJson[packagingKey];
+        let packagingHasNonNullId = false;
+
+        // Check if packaging is not null
+        if (packaging !== null) {
+            // Iterate over each ID
+            for (const idKey in packaging) {
+                const id = packaging[idKey];
+
+                // If any ID is not null, mark this packaging as having a non-null ID
+                if (id !== null) {
+                    packagingHasNonNullId = true;
+                    break;
+                }
+            }
+        }
+
+        // Store the result for this packaging
+        results.push(packagingHasNonNullId);
     }
 
     return results;
