@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '../components';
 import { checkFormsForNonNullIds, checkStrengthForNonNullIds, checkPackagingForNonNullIds } from './StockAvalibility';
 
-
-
 function Card({ salt_name, forms, salt_json, }) {
 
     const [formdata, setFormdata] = useState([]);
@@ -200,39 +198,6 @@ function Card({ salt_name, forms, salt_json, }) {
 
 export default Card;
 
-
-
-
-
-
-// Define checkProductAvailability function
-// const checkProductAvailability = (pharmacies) => {
-//     // Check if pharmacies is not undefined and is an object
-//     if (pharmacies && typeof pharmacies === 'object') {
-//         return Object.keys(pharmacies).some((key) => pharmacies[key] !== null);
-//     }
-//     // Return false if pharmacies is undefined or null or not an object
-//     return false;
-// };
-
-// Define checkAvailabilityRecursive function
-// const checkAvailabilityRecursive = (forms) => {
-//     // Check if forms is not undefined and is an object
-//     if (forms && typeof forms === 'object') {
-//         return Object.keys(forms).some((formType) => {
-//             const dosages = forms[formType];
-//             return Object.keys(dosages).some((dosage) => {
-//                 const quantities = dosages[dosage];
-//                 return Object.keys(quantities).some((quantity) => {
-//                     const pharmacies = quantities[quantity];
-//                     return checkProductAvailability(pharmacies);
-//                 });
-//             });
-//         });
-//     }
-//     // Return false if forms is undefined or null or not an object
-//     return false;
-// };
 
 
 
